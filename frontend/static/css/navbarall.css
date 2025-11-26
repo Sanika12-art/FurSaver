@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+/* Navbar Base Styles */
+.navbar {
+    background: #1a1a2e !important;
+    padding: 0.8rem 0.8rem;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Brand/Logo */
+.navbar-brand {
+    color: #FF6B6B !important;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-brand:hover {
+    color: #FF6B6B !important;
+}
+
+.navbar-brand i {
+    font-size: 1.8rem;
+}
+
+/* Navigation Links */
+.navbar-nav {
+    margin-left: auto;
+}
+
+.nav-item {
+    margin: 0 0.3rem;
+}
+
+.nav-link {
+    color: white !important;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    position: relative;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    opacity: 1;
+}
+
+/* Active Link Indicator */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #4ECDC4;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 80%;
+}
+
+.nav-link.active {
+    opacity: 1;
+}
+
+/* Toggle Button */
+.navbar-toggler {
+    border: none;
+    padding: 0.25rem 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+}
+
+.navbar-toggler:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Mobile Styles */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background: rgba(26, 26, 46, 0.95);
+        padding: 1rem;
+        margin-top: 0.5rem;
+        border-radius: 8px;
+    }
+
+    .nav-item {
+        margin: 0.2rem 0;
+    }
+
+    .nav-link {
+        padding: 0.8rem 1rem !important;
+    }
+
+    .nav-link.active {
+        background: rgba(78, 205, 196, 0.1);
+        border-radius: 6px;
+    }
+}

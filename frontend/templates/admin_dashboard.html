@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - FurSaver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-bg: #1e293b;
+            --secondary-bg: #334155;
+            --card-bg: #ffffff;
+            --accent-color: #06b6d4;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --border-color: #e2e8f0;
+        }
+
+    .btn {
+        display: inline-block;
+        font-weight: 500;
+        color: #ffffff;
+        text-align: center;
+        vertical-align: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-color: #ff4444f2;
+        border: 1px solid #00000063;
+        padding: .375rem .75rem;
+        font-size: 1.2rem;
+        line-height: 1.5;
+        border-radius: .25rem;
+        transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+
+        .dashboard-header i {
+            color: var(--accent-color);
+            margin-right: 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 2px solid var(--accent-color);
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0 !important;
+        }
+
+        .card-header h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            color: var(--accent-color);
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            height: 400px;
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+        }
+
+        .table thead th {
+            background: #f1f5f9;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1.2rem;
+            border-top: none;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .table td {
+            padding: 1.2rem;
+            vertical-align: middle;
+            border-color: var(--border-color);
+        }
+
+        .badge {
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .badge-success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        select.chart-selector {
+            background: #f8fafc;
+            border: 2px solid var(--accent-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select.chart-selector:hover {
+            background: #f1f5f9;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            padding: 0.8rem 1.2rem;
+            margin: 0 0.3rem;
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .page-item.active .page-link {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .dashboard-header {
+                font-size: 2rem;
+                padding: 1rem;
+            }
+
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="dashboard-header fade-in">
+                <i class="fas fa-user-shield"></i>Admin Dashboard - FurSaver
+            </h1>
+            <a href="{{ url_for('route_home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Go Back
+            </a>
+        </div>
+
+        <!-- Predictions Summary -->
+        <div class="card fade-in">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-notes-medical"></i>Disease Predictions Overview</h2>
+                <select id="predictionChartType" class="chart-selector">
+                    <option value="bar">Bar Chart</option>
+                    <option value="doughnut">Doughnut Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="polarArea">Polar Area</option>
+                </select>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Owner</th>
+                                <th>Pet Name</th>
+                                <th>Pet Type</th>
+                                <th>Disease</th>
+                                <th>Correct?</th>
+                                <th>Corrected Disease</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionTableBody"></tbody>
+                    </table>
+                </div>
+                <nav>
+                    <ul class="pagination justify-content-center" id="predictionPagination"></ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Donations Summary -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h2><i class="fas fa-donate"></i>Donations Summary</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Donor Name</th>
+                                <th>Email</th>
+                                <th>Amount (INR)</th>
+                                <th>Date</th>
+                                <th>Invoice</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donationTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="text-right mt-4">
+                    <h4 class="font-weight-bold text-primary">
+                        Grand Total Donations: <span id="grandTotalDonation">₹0.00</span>
+                    </h4>
+                </div>
+                <nav>
+                    <ul class="pagination justify-content-center" id="donationPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code goes here
+        let currentDonations = [];
+let currentPredictions = [];
+
+function renderPredictionChart(predictions) {
+    const ctx = document.getElementById("predictionChart").getContext("2d");
+    const correctCount = predictions.filter(p => p.is_correct).length;
+    const incorrectCount = predictions.length - correctCount;
+    const accuracy = (correctCount / predictions.length * 100).toFixed(1);
+
+    if (window.predictionChartInstance) {
+        window.predictionChartInstance.destroy();
+    }
+
+    const chartType = document.getElementById("predictionChartType").value;
+    const isCircularChart = ['pie', 'doughnut', 'polarArea'].includes(chartType);
+
+    const chartConfig = {
+        type: chartType,
+        data: {
+            labels: ["Correct Predictions", "Incorrect Predictions"],
+            datasets: [{
+                label: "Prediction Results",
+                data: [correctCount, incorrectCount],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(22, 163, 74)',
+                    'rgb(220, 38, 38)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: isCircularChart ? 'top' : 'bottom',
+                    labels: {
+                        font: {
+                            family: 'Poppins',
+                            size: 14
+                        },
+                        padding: 20
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `Prediction Accuracy: ${accuracy}%`,
+                    font: {
+                        family: 'Montserrat',
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    padding: 20
+                }
+            }
+        }
+    };
+
+    // Add specific options for bar chart
+    if (chartType === 'bar') {
+        chartConfig.options.scales = {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        };
+    }
+
+    window.predictionChartInstance = new Chart(ctx, chartConfig);
+}
+
+function populatePredictionTable(predictions) {
+    const tableBody = document.getElementById("predictionTableBody");
+    tableBody.innerHTML = "";
+    
+    predictions.forEach((item, index) => {
+        const correctnessBadge = item.is_correct 
+            ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Correct</span>' 
+            : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Incorrect</span>';
+
+        const correctedDisease = (!item.is_correct && item.correct_label) ? item.correct_label : '-';
+        const petType = item.pet_type || 'Unknown';
+        const source = item.source || 'Local';
+
+        const row = `<tr class="fade-in">
+            <td>${index + 1}</td>
+            <td>${item.owner_name || 'Unknown'}</td>
+            <td>${item.pet_name}</td>
+            <td>${petType}</td>
+            <td>${item.disease}</td>
+            <td>${correctnessBadge}</td>
+            <td>${correctedDisease}</td>
+            <td>${source}</td>
+        </tr>`;
+        
+        tableBody.innerHTML += row;
+    });
+}
+
+function populateDonationTable(donations) {
+    const tableBody = document.getElementById("donationTableBody");
+    tableBody.innerHTML = "";
+    let pageTotal = 0;
+
+    donations.forEach((item, index) => {
+        const amount = parseFloat(item.amount_inr);
+        pageTotal += amount;
+        const source = item.source || 'Local';
+        
+        // Enhanced download button logic
+        let downloadButton;
+        if (item.transaction_id) {
+            downloadButton = `
+                <button class="btn btn-sm btn-success" onclick="downloadInvoice('${item.transaction_id}')">
+                    <i class="fas fa-download mr-1"></i> Download
+                </button>`;
+        } else {
+            downloadButton = '<span class="text-muted">Not available</span>';
+        }
+
+        const row = `<tr class="fade-in">
+            <td>${index + 1}</td>
+            <td>${item.donor_name || 'Unknown'}</td>
+            <td>${item.donation_email || 'Unknown'}</td>
+            <td class="font-weight-bold">₹${amount.toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}</td>
+            <td>${formatDate(item.date)}</td>
+            <td>${downloadButton}</td>
+            <td>${source}</td>
+        </tr>`;
+        
+        tableBody.innerHTML += row;
+    });
+
+    const totalRow = `<tr class="table-info font-weight-bold fade-in">
+        <td colspan="3" class="text-right">Page Total:</td>
+        <td colspan="4">₹${pageTotal.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}</td>
+    </tr>`;
+    tableBody.innerHTML += totalRow;
+}
+
+function fetchPredictions(page = 1) {
+    showLoading('predictionTableBody');
+    fetch(`/api/get_predictions?page=${page}&per_page=10`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success" && data.predictions.length > 0) {
+                currentPredictions = data.predictions;
+                populatePredictionTable(currentPredictions);
+                renderPredictionChart(currentPredictions);
+                setupPagination(data.total_pages, page, "predictionPagination", fetchPredictions);
+                showSuccess('Predictions loaded successfully!');
+            } else {
+                showError('No prediction data available');
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching predictions:", error);
+            showError('Failed to load predictions');
+        });
+}
+
+function fetchDonations(page = 1) {
+    showLoading('donationTableBody');
+    fetch(`/api/get_donations?page=${page}&per_page=10`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success" && data.donations.length > 0) {
+                currentDonations = data.donations;
+                populateDonationTable(currentDonations);
+                setupPagination(data.total_pages, page, "donationPagination", fetchDonations);
+                
+                // Update grand total with animation
+                animateValue("grandTotalDonation", 0, data.grand_total_donations, 2000);
+                showSuccess('Donations loaded successfully!');
+            } else {
+                showError('No donation data available');
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching donations:", error);
+            showError('Failed to load donations');
+        });
+}
+
+function setupPagination(totalPages, currentPage, paginationId, fetchFunction) {
+    const pagination = document.getElementById(paginationId);
+    pagination.innerHTML = "";
+    
+    // Previous button
+    const prevLi = document.createElement("li");
+    prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+    prevLi.innerHTML = `
+        <a class="page-link" href="#" aria-label="Previous">
+            <i class="fas fa-chevron-left"></i>
+        </a>`;
+    if (currentPage !== 1) {
+        prevLi.addEventListener("click", () => fetchFunction(currentPage - 1));
+    }
+    pagination.appendChild(prevLi);
+
+    // Page numbers with ellipsis
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        pagination.appendChild(createPageItem(1, fetchFunction));
+        if (startPage > 2) {
+            pagination.appendChild(createEllipsisItem());
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagination.appendChild(createPageItem(i, fetchFunction, i === currentPage));
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            pagination.appendChild(createEllipsisItem());
+        }
+        pagination.appendChild(createPageItem(totalPages, fetchFunction));
+    }
+
+    // Next button
+    const nextLi = document.createElement("li");
+    nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+    nextLi.innerHTML = `
+        <a class="page-link" href="#" aria-label="Next">
+            <i class="fas fa-chevron-right"></i>
+        </a>`;
+    if (currentPage !== totalPages) {
+        nextLi.addEventListener("click", () => fetchFunction(currentPage + 1));
+    }
+    pagination.appendChild(nextLi);
+}
+
+function createPageItem(pageNumber, fetchFunction, isActive = false) {
+    const li = document.createElement("li");
+    li.className = `page-item ${isActive ? "active" : ""}`;
+    li.innerHTML = `<a class="page-link" href="#">${pageNumber}</a>`;
+    li.addEventListener("click", () => fetchFunction(pageNumber));
+    return li;
+}
+
+function createEllipsisItem() {
+    const li = document.createElement("li");
+    li.className = "page-item disabled";
+    li.innerHTML = '<a class="page-link" href="#">...</a>';
+    return li;
+}
+
+function showLoading(elementId) {
+    const element = document.getElementById(elementId);
+    element.innerHTML = `
+        <tr>
+            <td colspan="7" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2 text-primary">Loading data...</p>
+            </td>
+        </tr>`;
+}
+
+function showSuccess(message) {
+    const toast = createToast('success', message);
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function showError(message) {
+    const toast = createToast('error', message);
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+function createToast(type, message) {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type} fade-in`;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        background: ${type === 'success' ? '#22c55e' : '#ef4444'};
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        min-width: 300px;
+    `;
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            ${message}
+        </div>`;
+    return toast;
+}
+
+function animateValue(elementId, start, end, duration) {
+    const element = document.getElementById(elementId);
+    const startTime = performance.now();
+    
+    function updateValue(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const value = start + (end - start) * progress;
+        element.textContent = '₹' + value.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateValue);
+        }
+    }
+    
+    requestAnimationFrame(updateValue);
+}
+
+function formatDate(dateString) {
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-IN', options);
+}
+
+
+function downloadInvoice(transactionId) {
+    if (!transactionId) {
+        showError('Invoice not available for this donation');
+        return;
+    }
+
+    const btn = event.target.closest('button');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+    fetch(`/static/invoices/invoice_${transactionId}.pdf`)
+        .then(response => {
+            if (!response.ok) {
+                // If invoice doesn't exist, try to generate it
+                return fetch(`/api/generate-invoice/${transactionId}`);
+            }
+            return response;
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Unable to retrieve or generate invoice');
+            }
+            window.location.href = `/static/invoices/invoice_${transactionId}.pdf`;
+        })
+        .catch(error => {
+            console.error('Invoice error:', error);
+            showError('Could not download invoice');
+        })
+        .finally(() => {
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }, 1000);
+        });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchDonations();
+    fetchPredictions();
+});
+
+document.getElementById("predictionChartType").addEventListener("change", function() {
+    renderPredictionChart(currentPredictions);
+});
+    </script>
+</body>
+</html>

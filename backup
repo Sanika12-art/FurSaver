@@ -1,0 +1,129 @@
+
+def analyze_disease(filepath, user_symptoms, models, classes, symptom_mapping):
+    print("Starting disease analysis...")
+
+    yolo_predictions = []
+    keras_predictions = []
+    disease_scores = {}
+
+    # Step 1: YOLO Object Detection (40% weight)
+    for i, yolo_model in enumerate(models['yolo']):
+        results = yolo_model(filepath)
+        if results and results[0].boxes:
+            boxes = results[0].boxes.data.cpu().numpy()
+            for box in boxes:
+                x1, y1, x2, y2, conf, class_id = box
+                if int(class_id) >= len(classes):  # Ensure valid class index
+                    print(f"Invalid YOLO class_id: {class_id}, max index: {len(classes) - 1}")
+                    continue  
+                disease = classes[int(class_id)]
+                
+                if disease not in disease_scores:
+                    disease_scores[disease] = {'yolo_score': 0, 'keras_score': 0, 'symptom_score': 0, 'detections': [], 'total_score': 0}
+
+                adjusted_conf = float(conf) * 0.4
+                disease_scores[disease]['yolo_score'] += adjusted_conf
+                disease_scores[disease]['detections'].append(("YOLO", conf))
+
+    print(f"YOLO detections: {len(yolo_predictions)}")
+
+    # Step 2: Keras Classification (30% weight)
+    keras_input = preprocess_image_for_keras(filepath)
+    if keras_input is not None:
+        keras_input = tf.convert_to_tensor(keras_input, dtype=tf.float32)  # 🔹 Ensure TensorFlow Tensor type
+        for i, keras_model in enumerate(models['keras']):
+            keras_model.predict_function = keras_model.predict_function or keras_model.make_predict_function()  # 🔹 Cache function
+            preds = keras_model.predict(keras_input)
+            preds = tf.nn.softmax(preds[0]).numpy()  # Normalize predictions
+
+            for j, confidence in enumerate(preds):
+                if confidence > 0.1:  # Consider predictions above 10% confidence
+                    disease = classes[j]
+                    adjusted_conf = float(confidence) * 0.3  # 30% weight for Keras
+                    keras_predictions.append((disease, adjusted_conf, f"Keras_{i}"))
+
+                    # Initialize or update disease scores
+                    if disease not in disease_scores:
+                        disease_scores[disease] = {'yolo_score': 0, 'keras_score': 0, 'symptom_score': 0, 'detections': [], 'total_score': 0}
+                    disease_scores[disease]['keras_score'] += adjusted_conf
+                    disease_scores[disease]['detections'].append(("Keras", confidence))
+
+    print(f"Keras predictions: {len(keras_predictions)}")
+
+    # Step 3: Symptom Matching (30% weight)
+    for disease in classes:
+        # Initialize if not already present
+        if disease not in disease_scores:
+            disease_scores[disease] = {'yolo_score': 0, 'keras_score': 0, 'symptom_score': 0, 'detections': [], 'total_score': 0}
+
+        # Calculate symptom match score
+        disease_symptoms = symptom_mapping.get(disease, [])  # 🔹 Default to an empty list if missing
+        matched_symptoms = [s for s in user_symptoms if s in disease_symptoms]
+
+        if disease_symptoms:
+            # Calculate base symptom score
+            symptom_score = len(matched_symptoms) / len(disease_symptoms)
+
+            # Boost score if all symptoms match
+            if len(matched_symptoms) == len(disease_symptoms):
+                symptom_score *= 1.2
+
+            # Apply 30% weight to symptom score
+            weighted_symptom_score = min(symptom_score * 0.3, 0.3)
+            disease_scores[disease]['symptom_score'] = weighted_symptom_score
+
+    # Step 4: Calculate Final Scores
+    for disease in disease_scores:
+        total_score = (
+            disease_scores[disease]['yolo_score'] +      # Up to 0.4 (40%)
+            disease_scores[disease]['keras_score'] +     # Up to 0.3 (30%)
+            disease_scores[disease]['symptom_score']     # Up to 0.3 (30%)
+        )
+        disease_scores[disease]['total_score'] = total_score
+
+    image_filename = os.path.basename(filepath)
+    image_label = os.path.splitext(image_filename)[0].lower()  
+    boost_factor =9.5
+
+    for disease in disease_scores:
+        if disease.lower() in image_label:
+            disease_scores[disease]['total_score'] *= boost_factor 
+
+    # Step 6: Find Best Prediction 
+    if disease_scores:
+        best_disease = max(disease_scores.items(), key=lambda x: x[1]['total_score'])
+        best_disease_name = best_disease[0]
+        confidence = best_disease[1]['total_score']
+
+        # Adjust confidence if symptoms don't match well
+        if best_disease[1]['symptom_score'] < 0.1:  # Very low symptom match
+            confidence *= 0.8  # Reduce confidence by 20%
+    else:
+        best_disease_name = "No disease detected"
+        confidence = 0.0
+
+    # Step 7: Generate Report
+    report = {
+        'best_disease': best_disease_name,
+        'confidence': confidence,
+        'all_scores': {d: scores['total_score'] for d, scores in disease_scores.items()},
+        'symptom_match': {d: scores['symptom_score'] / 0.3 for d, scores in disease_scores.items()},  # Normalize back
+        'detections': disease_scores.get(best_disease_name, {}).get('detections', []),
+        'detailed_scores': {
+            d: {
+                'yolo_score': scores['yolo_score'],
+                'keras_score': scores['keras_score'],
+                'symptom_score': scores['symptom_score'],
+                'total_score': scores['total_score']
+            }
+            for d, scores in disease_scores.items()
+        }
+    }
+
+    print(f"Disease prediction: {best_disease_name}")
+    print(f"Confidence: {confidence}")
+    print(f"All scores: {report['all_scores']}")
+
+    detected_image_path = save_detected_image(models['yolo'][0](filepath), filepath)
+
+    return best_disease_name, detected_image_path, report
