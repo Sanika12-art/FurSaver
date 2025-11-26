@@ -1,6 +1,8 @@
-venv/
+models/*.h5
+models/*.keras
+models/*.pb
 __Pycache__/
-.vscode/
-.env
-*.log
-*.pyc
+*.pkl
+*.zip
+*.tar.gz
+*.npz
